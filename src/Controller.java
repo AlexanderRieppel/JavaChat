@@ -98,14 +98,14 @@ public class Controller {
 							display.sleep();
 				}
 			} else if (event.getSource() == view.getNextButtonClient()) {
-				if (view.getChatList().getSelection() != null) {
+				if (!view.getChatServerAddress().getText().equals("")&&!view.getChatPort().getText().equals("")) {
 					view.getClientShell().close();
 					go = 4;
 					chatRun();
 				} else {
 					view.getClientShell().close();
 					view.failGUI();
-					view.getFail().setText("Please select a Chat");
+					view.getFail().setText("Enter a Server Address and the Port");
 					view.getFailShell().pack();
 					view.getFailShell().setSize(300, 100);
 					view.getBack().addSelectionListener(this);

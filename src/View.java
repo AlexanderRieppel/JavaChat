@@ -43,9 +43,13 @@ public class View {
 	private Text chatPassword = null;
 
 	// Client Wondow
-	private Button nextButtonClient = null;
-	private List chatList = null;
 	private Label chatLabel = null;
+	private Label lchatServerAddress = null;
+	private Label lchatPort = null;
+	private Text chatServerAddress = null;
+	private Text chatPort = null;
+	private Button nextButtonClient = null;
+	
 
 	// Chat Window
 	private List userList = null;
@@ -207,8 +211,30 @@ public class View {
 		chatLabel.setLayoutData(BorderLayout.NORTH);
 		chatLabel.setText("Choose your Chat");
 
-		chatList = new List(clientShell, SWT.BORDER | SWT.V_SCROLL);
-		chatList.setLayoutData(BorderLayout.CENTER);
+		Composite composite = new Composite(clientShell, SWT.NONE);
+		composite.setLayoutData(BorderLayout.CENTER);
+		composite.setLayout(new GridLayout(2, false));
+		
+		lchatServerAddress = new Label(composite, SWT.NONE);
+		lchatServerAddress.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true, 1, 1));
+		lchatServerAddress.setBounds(0, 0, 77, 15);
+		lchatServerAddress.setText("Server Address");
+		
+		chatServerAddress = new Text(composite, SWT.BORDER);
+		GridData gd_text = new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1);
+		gd_text.widthHint = 100;
+		chatServerAddress.setLayoutData(gd_text);
+
+		
+		lchatPort = new Label(composite, SWT.NONE);
+		lchatPort.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true, 1, 1));
+		lchatPort.setBounds(0, 0, 22, 15);
+		lchatPort.setText("Port");
+		
+		chatPort = new Text(composite, SWT.BORDER);
+		GridData gd_text_1 = new GridData(SWT.LEFT, SWT.CENTER, true, true, 1, 1);
+		gd_text_1.widthHint = 100;
+		chatPort.setLayoutData(gd_text_1);
 
 		nextButtonClient = new Button(clientShell, SWT.CENTER);
 		nextButtonClient.setLayoutData(BorderLayout.SOUTH);
@@ -407,12 +433,20 @@ public class View {
 		this.nextButtonClient = nextButtonClient;
 	}
 
-	public List getChatList() {
-		return chatList;
+	public Text getChatServerAddress() {
+		return chatServerAddress;
 	}
 
-	public void setChatList(List chatList) {
-		this.chatList = chatList;
+	public void setChatServerAddress(Text chatServerAddress) {
+		this.chatServerAddress = chatServerAddress;
+	}
+
+	public Text getChatPort() {
+		return chatPort;
+	}
+
+	public void setChatPort(Text chatPort) {
+		this.chatPort = chatPort;
 	}
 
 	public List getUserList() {
