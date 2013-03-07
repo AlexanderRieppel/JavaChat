@@ -1,12 +1,25 @@
+import java.net.Socket;
+import java.net.UnknownHostException;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
 
+import Client.Connection;
+import Server.*;
+
 public class Controller {
-	//private final Model model = new Model();
+	// private final Model model = new Model();
 	private View view;
 	private Display display;
 	private int go = 1;
+	private String name = "";
+	private String serverAddress = "";
+	private int serverPort = 0;
+	
+	private List<ConnectionServer> clients = new ArrayList<ConnectionServer>();
 
 	Controller(Display display) {
 		this.display = display;
@@ -18,7 +31,7 @@ public class Controller {
 		while (!view.getMainShell().isDisposed())
 			if (!display.readAndDispatch())
 				display.sleep();
-	} 
+	}
 
 	public void hostRun() {
 		view.hostGUI();
@@ -51,6 +64,7 @@ public class Controller {
 			if (event.getSource() == view.getNextButtonFirst()) {
 				if (view.getHostOption().getSelection()
 						&& !view.getUserName().getText().equals("")) {
+					name = view.getUserName().getText();
 					view.getMainShell().close();
 					go = 2;
 					hostRun();
@@ -84,6 +98,7 @@ public class Controller {
 				if (!view.getChatName().getText().equals("")) {
 					view.getHostShell().close();
 					go = 4;
+					ConnectionReader cr = new ConnectionReader(25575);
 					chatRun();
 				} else {
 					view.getHostShell().close();
@@ -98,14 +113,28 @@ public class Controller {
 							display.sleep();
 				}
 			} else if (event.getSource() == view.getNextButtonClient()) {
-				if (!view.getChatServerAddress().getText().equals("")&&!view.getChatPort().getText().equals("")) {
-					view.getClientShell().close();
+				if (!view.getChatServerAddress().getText().equals("")
+						&& !view.getChatPort().getText().equals("")) {
+					
 					go = 4;
+					serverAddress = view.getChatServerAddress().getText();
+					try {
+						serverPort = Integer.parseInt(view.getChatPort()
+								.getText());
+					} catch (NumberFormatException exc) {
+						// fehlt
+					}
+					view.getClientShell().close();
+					Connection c = new Connection(serverAddress, serverPort);
+
+					c.start();
 					chatRun();
+
 				} else {
 					view.getClientShell().close();
 					view.failGUI();
-					view.getFail().setText("Enter a Server Address and the Port");
+					view.getFail().setText(
+							"Enter a Server Address and the Port");
 					view.getFailShell().pack();
 					view.getFailShell().setSize(300, 100);
 					view.getBack().addSelectionListener(this);
@@ -127,6 +156,10 @@ public class Controller {
 			}
 
 		}
+	}
+	
+	public void addClients(Socket socket){
+		clients.add(new ConnectionServer(socket,this));
 	}
 
 	public static void main(String args[]) {
