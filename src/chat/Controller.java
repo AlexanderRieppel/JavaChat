@@ -1,4 +1,5 @@
 package chat;
+
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
@@ -13,6 +14,8 @@ import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
 
 public class Controller {
@@ -27,9 +30,9 @@ public class Controller {
 	/**
 	 * Main constructor. Takes a String containing the name (or id) of the user.
 	 */
-	public Controller(String name, Display display) {
+	public Controller(Display display) {
 		this.display = display;
-		this.name = name;
+		name = "";
 
 		// This is the multicast group we'll be using.
 		dest = new InetSocketAddress("239.1.2.3", 1234);
@@ -69,6 +72,9 @@ public class Controller {
 		view = new View(display, reader);
 		view.getChatMessage().addKeyListener(key);
 		view.getMainShell().addDisposeListener(disoseListener);
+		view.getAbort().addSelectionListener(selectListener);
+		view.getName().addSelectionListener(selectListener);
+		view.getSend().addSelectionListener(selectListener);
 		try {
 			send("I connected");
 		} catch (IOException e) {
@@ -80,10 +86,27 @@ public class Controller {
 	}
 
 	public void send(String msg) throws IOException {
-		String buf = name + ": " + msg;
-		byte[] b = buf.getBytes();
-		DatagramPacket packet = new DatagramPacket(b, 0, b.length, dest);
-		socket.send(packet);
+		if (!name.equals("")) {
+			String buf = name + ": " + msg;
+			byte[] b = buf.getBytes();
+			DatagramPacket packet = new DatagramPacket(b, 0, b.length, dest);
+			socket.send(packet);
+		}else
+			forgotName();
+	}
+	private void forgotName(){
+		view.getMainShell().setEnabled(false);
+		final Settings s = new Settings(display);
+		s.fehler();
+		
+		s.getSettingsShell().addDisposeListener(new DisposeListener() {
+			@Override
+			public void widgetDisposed(DisposeEvent e) {
+				s.getSettingsShell().dispose();
+				view.getMainShell().setEnabled(true);
+			}
+		});
+		s.open();
 	}
 
 	KeyAdapter key = new KeyAdapter() {
@@ -91,6 +114,58 @@ public class Controller {
 		@Override
 		public void keyReleased(KeyEvent e) {
 			if (e.keyCode == 13) {
+				try {
+					send(view.getChatMessage().getText());
+					view.getChatMessage().setText("");
+				} catch (IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+			}
+		}
+
+	};
+	SelectionAdapter selectListener = new SelectionAdapter() {
+
+		@Override
+		public void widgetSelected(SelectionEvent event) {
+			if (event.getSource() == view.getName()) {
+				view.getMainShell().setEnabled(false);
+				final Settings s = new Settings(display);
+				s.initGUI();
+				s.getSave().addSelectionListener(new SelectionAdapter() {
+
+					@Override
+					public void widgetSelected(SelectionEvent event) {
+						if (event.getSource() == s.getSave()) {
+							name = s.getUserName().getText();
+							s.getSettingsShell().dispose();
+						}
+					}
+				});
+				s.getSettingsShell().addDisposeListener(new DisposeListener() {
+					@Override
+					public void widgetDisposed(DisposeEvent e) {
+						s.getSettingsShell().dispose();
+						view.getMainShell().setEnabled(true);
+					}
+				});
+				s.open();
+			} else if (event.getSource() == view.getAbort()) {
+				view.getMainShell().setEnabled(false);
+				final Settings s = new Settings(display);
+				s.initGuiVersion();
+				if (!name.equals(""))
+					s.getLblName().setText("Name: " + name);
+				s.getSettingsShell().addDisposeListener(new DisposeListener() {
+					@Override
+					public void widgetDisposed(DisposeEvent e) {
+						s.getSettingsShell().dispose();
+						view.getMainShell().setEnabled(true);
+					}
+				});
+				s.open();
+			}else if(event.getSource() == view.getSend()) {
 				try {
 					send(view.getChatMessage().getText());
 					view.getChatMessage().setText("");
@@ -120,7 +195,7 @@ public class Controller {
 
 	public static void main(String args[]) {
 		display = new Display();
-		new Controller("ALY", display);
+		new Controller(display);
 		display.dispose();
 	}
 }

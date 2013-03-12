@@ -3,8 +3,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
 
-import org.eclipse.swt.widgets.Display;
-
 /**
  * Reader thread.
  */
@@ -32,9 +30,7 @@ public class Reader extends Thread {
 				e.printStackTrace();
 			}
 			// We got a packet, let's extract the message and display it
-
-			final String line = new String(p.getData(), 0, p.getLength());
-			System.out.println(line);
+			String line = new String(p.getData(), 0, p.getLength());
 			lastMessage = line;
 			message = line + "\n";
 		}

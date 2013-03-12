@@ -1,4 +1,5 @@
 package chat;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -15,12 +16,15 @@ import org.eclipse.swt.widgets.Text;
 import swing2swt.layout.BorderLayout;
 
 public class View {
-	private static Shell mainShell;
+	private Shell mainShell;
 	private Display display;
 	private Text chatText;
 	private Text chatMessage;
 	private List list;
 	private Reader reader;
+	private MenuItem abort;
+	private MenuItem name;
+	private Button send;
 
 	public View(final Display display, Reader reader) {
 		this.display = display;
@@ -40,10 +44,8 @@ public class View {
 	public void open() {
 		mainShell.open();
 		while (!mainShell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				// chatText.append(controller.getReader().getMessage());
+			if (!display.readAndDispatch())
 				display.sleep();
-			}
 		}
 	}
 
@@ -52,6 +54,7 @@ public class View {
 
 		chatText = new Text(mainShell, SWT.BORDER | SWT.V_SCROLL | SWT.MULTI);
 		chatText.setLayoutData(BorderLayout.CENTER);
+		chatText.setEditable(false);
 		chatText.setText("");
 
 		list = new List(mainShell, SWT.BORDER);
@@ -80,14 +83,14 @@ public class View {
 		chatMessage.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true,
 				false, 1, 1));
 
-		Button button = new Button(inside, SWT.NONE);
-		button.setText("SEND");
-		button.setAlignment(SWT.RIGHT);
+		send = new Button(inside, SWT.NONE);
+		send.setText("SEND");
+		send.setAlignment(SWT.RIGHT);
 
 		Label lblNewLabel = new Label(composite, SWT.NONE);
 		lblNewLabel.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true,
 				false, 1, 1));
-		lblNewLabel.setText("GO to Settings and change your name in!");
+		lblNewLabel.setText("Go to Settings and change your name!");
 
 		Menu menu = new Menu(mainShell, SWT.BAR);
 		mainShell.setMenuBar(menu);
@@ -98,11 +101,11 @@ public class View {
 		Menu menu_1 = new Menu(settings);
 		settings.setMenu(menu_1);
 
-		MenuItem name = new MenuItem(menu_1, SWT.NONE);
+		name = new MenuItem(menu_1, SWT.NONE);
 		name.setText("Change Name");
 
-		MenuItem mntmNewItem_1 = new MenuItem(menu_1, SWT.NONE);
-		mntmNewItem_1.setText("Abort");
+		abort = new MenuItem(menu_1, SWT.NONE);
+		abort.setText("Abort");
 	}
 
 	public Text getChatText() {
@@ -137,13 +140,37 @@ public class View {
 		this.chatMessage = chatMessage;
 	}
 
+	public MenuItem getAbort() {
+		return abort;
+	}
+
+	public void setAbort(MenuItem abort) {
+		this.abort = abort;
+	}
+
+	public MenuItem getName() {
+		return name;
+	}
+
+	public void setName(MenuItem name) {
+		this.name = name;
+	}
+
+	public Button getSend() {
+		return send;
+	}
+
+	public void setSend(Button send) {
+		this.send = send;
+	}
+
 	class LongRunningOperation extends Thread {
 		private Display display;
 		private Text progressBar;
 		private List list;
 		private String s;
 		private String[] neu;
-		private int anzahl;
+		//private int anzahl;
 
 		/**
 		 * Alles übergeben was aus diesem Thread erreichbar sein soll
@@ -153,7 +180,7 @@ public class View {
 			this.progressBar = progressBar;
 			this.list = list;
 			s = "";
-			anzahl = 0;
+			//anzahl = 0;
 		}
 
 		/**
