@@ -21,11 +21,13 @@ import org.eclipse.swt.widgets.Display;
 public class Controller {
 
 	private String name;
-	private SocketAddress dest = null;
+	// private SocketAddress dest = null;
 	private Reader reader;
 	private MulticastSocket socket = null;
 	private View view;
 	private static Display display = null;
+	private int port;
+	private InetAddress group;
 
 	/**
 	 * Main constructor. Takes a String containing the name (or id) of the user.
@@ -35,20 +37,23 @@ public class Controller {
 		name = "";
 
 		// This is the multicast group we'll be using.
-		dest = new InetSocketAddress("239.1.2.3", 1234);
+		// dest = new InetSocketAddress("239.1.2.3", 1234);
 
 		try {
 			// The socket is created and bound to the proper port.
 			socket = new MulticastSocket(1234);
+			socket.setInterface(InetAddress.getLocalHost());
+			group = InetAddress.getByName("239.1.2.3");
+			port = 1234;
 			// Set the loopback mode to false if you don't want to see your
 			// own messages
 			// socket.setLoopbackMode(false);
 
 			// get the default Network Interface
-			NetworkInterface netif = NetworkInterface
-					.getByInetAddress(InetAddress.getLocalHost());
+			// NetworkInterface netif = NetworkInterface
+			// .getByInetAddress(InetAddress.getLocalHost());
 			// Join the multicast group
-			socket.joinGroup(dest, netif);
+			socket.joinGroup(group);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
@@ -89,16 +94,18 @@ public class Controller {
 		if (!name.equals("")) {
 			String buf = name + ": " + msg;
 			byte[] b = buf.getBytes();
-			DatagramPacket packet = new DatagramPacket(b, 0, b.length, dest);
+			DatagramPacket packet = new DatagramPacket(b, 0, b.length, group,
+					port);
 			socket.send(packet);
-		}else
+		} else
 			forgotName();
 	}
-	private void forgotName(){
+
+	private void forgotName() {
 		view.getMainShell().setEnabled(false);
 		final Settings s = new Settings(display);
 		s.fehler();
-		
+
 		s.getSettingsShell().addDisposeListener(new DisposeListener() {
 			@Override
 			public void widgetDisposed(DisposeEvent e) {
@@ -165,7 +172,7 @@ public class Controller {
 					}
 				});
 				s.open();
-			}else if(event.getSource() == view.getSend()) {
+			} else if (event.getSource() == view.getSend()) {
 				try {
 					send(view.getChatMessage().getText());
 					view.getChatMessage().setText("");
