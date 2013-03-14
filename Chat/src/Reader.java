@@ -1,34 +1,38 @@
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.MulticastSocket;
-import java.net.SocketException;
 
 /**
- * Reader thread.
+ * This class is the Reader thread. It's for the listening on the multicastport
+ * you gave him from the constructor.
+ * 
+ * @author AHMED ALY, Alexander Rieppel
+ * @version 03-14-2013
  */
 public class Reader extends Thread {
 	private MulticastSocket socket = null;
 	private String message;
-	private String lastMessage;
 
+	/**
+	 * This constructor gets the Multicastsocket and initialize
+	 * 
+	 * @param socket
+	 *            gets the Multicastsocket
+	 */
 	public Reader(MulticastSocket socket) {
 		message = "";
-		lastMessage = "";
 		this.socket = socket;
 	}
 
+	/**
+	 * This run function is for the Thread necessary to start. It's create a
+	 * DatagramPacket read the byte code coming and put it in a String
+	 */
 	public void run() {
 		byte[] buf = null;
-		try {
-			buf = new byte[socket.getReceiveBufferSize()];
-		} catch (SocketException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		}
+		buf = new byte[1000];
 		DatagramPacket p = null;
-		// Just loop forever, as the main thread will take care of the
-		// exit conditions
+
 		while (true) {
 			try {
 				p = new DatagramPacket(buf, buf.length);
@@ -36,27 +40,31 @@ public class Reader extends Thread {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-			// We got a packet, let's extract the message and display it
-			String line = new String(p.getData());
-			lastMessage = line;
-			message = line + "\n";
+
+			String line = new String(p.getData(), 0, p.getLength());
+			if (!line.equals("")) {
+				message = line + "\n";
+			}
 		}
 	}
 
+	/**
+	 * get the message came in
+	 * 
+	 * @return message came in
+	 */
 	public String getMessage() {
 		return message;
 	}
 
+	/**
+	 * set the message
+	 * 
+	 * @param message
+	 *            message
+	 */
 	public void setMessage(String message) {
 		this.message = message;
-	}
-
-	public String getLastMessage() {
-		return lastMessage;
-	}
-
-	public void setLastMessage(String lastMessage) {
-		this.lastMessage = lastMessage;
 	}
 
 }

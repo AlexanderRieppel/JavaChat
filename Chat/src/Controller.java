@@ -1,15 +1,11 @@
-
-
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.MulticastSocket;
-import java.net.NetworkInterface;
-import java.net.SocketAddress;
 
 import javax.swing.UIManager;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.KeyAdapter;
@@ -18,10 +14,17 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.widgets.Display;
 
+/**
+ * This is the Controller Class where the Listener, the Main Function and the
+ * connection with the MulticastSocket is.
+ * 
+ * @author AHMED ALY, Alexander Rieppel
+ * @version 03-14-2013
+ * 
+ */
 public class Controller {
 
 	private String name;
-	// private SocketAddress dest = null;
 	private Reader reader;
 	private MulticastSocket socket = null;
 	private View view;
@@ -30,46 +33,30 @@ public class Controller {
 	private InetAddress group;
 
 	/**
-	 * Main constructor. Takes a String containing the name (or id) of the user.
+	 * This is the main constructor. Starts the Reader class set the listener
+	 * for the View GUI and start it of corse. We also join here the
+	 * MulticastSocket Group.
 	 */
 	public Controller(Display display) {
 		this.display = display;
 		name = "";
 
-		// This is the multicast group we'll be using.
-		// dest = new InetSocketAddress("239.1.2.3", 1234);
-
 		try {
-			// The socket is created and bound to the proper port.
-			this.port= 6789;
+			port = 6789;
 			socket = new MulticastSocket(port);
-			socket.setInterface(InetAddress.getLocalHost());
-			group = InetAddress.getByName("224.1.3.5");
-			//port = 6789;
-			// Set the loopback mode to false if you don't want to see your
-			// own messages
-			// socket.setLoopbackMode(false);
+			// socket.setInterface(InetAddress.getLocalHost());
+			group = InetAddress.getByName("226.1.3.5");
 
-			// get the default Network Interface
-			// NetworkInterface netif = NetworkInterface
-			// .getByInetAddress(InetAddress.getLocalHost());
-			// Join the multicast group
 			socket.joinGroup(group);
 		} catch (Exception e) {
 			e.printStackTrace();
 			System.exit(1);
 		}
 
-		// From here onwards, the GUI is created
-
-		// Force SwingSet to come up in the Cross Platform L&F
 		try {
 			UIManager.setLookAndFeel(UIManager
 					.getCrossPlatformLookAndFeelClassName());
-			// If you want the System L&F instead, comment out the above line
-			// and
-			// uncomment the following:
-			// UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+
 		} catch (Exception exc) {
 			System.err.println("Error loading L&F: " + exc);
 		}
@@ -81,11 +68,19 @@ public class Controller {
 		view.getAbort().addSelectionListener(selectListener);
 		view.getName().addSelectionListener(selectListener);
 		view.getSend().addSelectionListener(selectListener);
-		
+
 		view.open();
 
 	}
 
+	/**
+	 * This function is for put the message in a packet and send it to the
+	 * socket which send it to the group.
+	 * 
+	 * @param msg
+	 *            your message you want to send
+	 * @throws IOException
+	 */
 	public void send(String msg) throws IOException {
 		if (!name.equals("")) {
 			String buf = name + ": " + msg;
@@ -93,11 +88,14 @@ public class Controller {
 			DatagramPacket packet = new DatagramPacket(b, 0, b.length, group,
 					port);
 			socket.send(packet);
-			System.out.println("Gesendet");
-		} else
+		} else if (name.equals(""))
 			forgotName();
 	}
 
+	/**
+	 * If you forgot to set the Name this function open a GUI which tell you
+	 * that you forgot message.
+	 */
 	private void forgotName() {
 		view.getMainShell().setEnabled(false);
 		final Settings s = new Settings(display);
@@ -113,22 +111,28 @@ public class Controller {
 		s.open();
 	}
 
+	/**
+	 * This Listener is for the textfield. "if enter send the message"
+	 */
 	KeyAdapter key = new KeyAdapter() {
 
 		@Override
 		public void keyReleased(KeyEvent e) {
-			if (e.keyCode == 13) {
+			if (e.character == SWT.CR) {
 				try {
-					send(view.getChatMessage().getText());
-					view.getChatMessage().setText("");
+					if (!view.getChatMessage().getText().equals("")) {
+						send(view.getChatMessage().getText());
+						view.getChatMessage().setText("");
+					}
 				} catch (IOException e1) {
-					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
 			}
 		}
-
 	};
+	/**
+	 * This Listener is for the menu buttons and for the send button.
+	 */
 	SelectionAdapter selectListener = new SelectionAdapter() {
 
 		@Override
@@ -147,6 +151,17 @@ public class Controller {
 						}
 					}
 				});
+				s.getUserName().addKeyListener(new KeyAdapter() {
+
+					@Override
+					public void keyReleased(KeyEvent e) {
+						if (e.character == SWT.CR) {
+							name = s.getUserName().getText();
+							s.getSettingsShell().dispose();
+						}
+					}
+
+				});
 				s.getSettingsShell().addDisposeListener(new DisposeListener() {
 					@Override
 					public void widgetDisposed(DisposeEvent e) {
@@ -159,8 +174,6 @@ public class Controller {
 				view.getMainShell().setEnabled(false);
 				final Settings s = new Settings(display);
 				s.initGuiVersion();
-				if (!name.equals(""))
-					s.getLblName().setText("Name: " + name);
 				s.getSettingsShell().addDisposeListener(new DisposeListener() {
 					@Override
 					public void widgetDisposed(DisposeEvent e) {
@@ -171,8 +184,10 @@ public class Controller {
 				s.open();
 			} else if (event.getSource() == view.getSend()) {
 				try {
-					send(view.getChatMessage().getText());
-					view.getChatMessage().setText("");
+					if (!view.getChatMessage().getText().equals("")) {
+						send(view.getChatMessage().getText());
+						view.getChatMessage().setText("");
+					}
 				} catch (IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -181,7 +196,9 @@ public class Controller {
 		}
 
 	};
-
+	/**
+	 * If you close the GUI window this listener close the programm.
+	 */
 	DisposeListener disoseListener = new DisposeListener() {
 		@Override
 		public void widgetDisposed(DisposeEvent e) {
@@ -189,14 +206,27 @@ public class Controller {
 		}
 	};
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Reader getReader() {
 		return reader;
 	}
 
+	/**
+	 * 
+	 * @param reader
+	 */
 	public void setReader(Reader reader) {
 		this.reader = reader;
 	}
 
+	/**
+	 * The main Methode
+	 * 
+	 * @param args
+	 */
 	public static void main(String args[]) {
 		display = new Display();
 		new Controller(display);

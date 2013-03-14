@@ -1,5 +1,3 @@
-
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -7,7 +5,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.Shell;
@@ -15,17 +12,31 @@ import org.eclipse.swt.widgets.Text;
 
 import swing2swt.layout.BorderLayout;
 
+/**
+ * This is the Main GUI Class its here for the chat gui.
+ * 
+ * @author AHMED ALY, Alexander Rieppel
+ * @version 03-14-2013
+ * 
+ */
 public class View {
 	private Shell mainShell;
 	private Display display;
 	private Text chatText;
 	private Text chatMessage;
-	private List list;
+
 	private Reader reader;
 	private MenuItem abort;
 	private MenuItem name;
 	private Button send;
 
+	/**
+	 * 
+	 * Main Constructor initialize the Shell and set the Location and the size.
+	 * 
+	 * @param display
+	 * @param reader
+	 */
 	public View(final Display display, Reader reader) {
 		this.display = display;
 		this.reader = reader;
@@ -36,11 +47,15 @@ public class View {
 		mainShell.pack();
 		mainShell.setLocation(200, 200);
 		mainShell.setSize(800, 600);
-		//System.out.println(reader.getMessage());
-		new LongRunningOperation(display, chatText, list).start();
+		new LongRunningOperation(display, chatText).start();
 
 	}
 
+	/**
+	 * This function is for opening the swt gui and for makeing sure it does not
+	 * close after open it emedeatly. This function let the gui open until you
+	 * close it. This function is nessesary because swt is a thred.
+	 */
 	public void open() {
 		mainShell.open();
 		while (!mainShell.isDisposed()) {
@@ -49,6 +64,9 @@ public class View {
 		}
 	}
 
+	/**
+	 * This function is for the main gui. It's create the GUI.
+	 */
 	public void initGUI() {
 		mainShell.setLayout(new BorderLayout(0, 0));
 
@@ -56,9 +74,6 @@ public class View {
 		chatText.setLayoutData(BorderLayout.CENTER);
 		chatText.setEditable(false);
 		chatText.setText("");
-
-		list = new List(mainShell, SWT.BORDER);
-		list.setLayoutData(BorderLayout.WEST);
 
 		Composite composite = new Composite(mainShell, SWT.NONE);
 		GridLayout gl_composite = new GridLayout(1, false);
@@ -108,83 +123,141 @@ public class View {
 		abort.setText("Abort");
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Text getChatText() {
 		return chatText;
 	}
 
+	/**
+	 * 
+	 * @param chatText
+	 */
 	public void setChatText(Text chatText) {
 		this.chatText = chatText;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Shell getMainShell() {
 		return mainShell;
 	}
 
+	/**
+	 * 
+	 * @param mainShell
+	 */
 	public void setMainShell(Shell mainShell) {
 		this.mainShell = mainShell;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Display getDisplay() {
 		return display;
 	}
 
+	/**
+	 * 
+	 * @param display
+	 */
 	public void setDisplay(Display display) {
 		this.display = display;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Text getChatMessage() {
 		return chatMessage;
 	}
 
+	/**
+	 * 
+	 * @param chatMessage
+	 */
 	public void setChatMessage(Text chatMessage) {
 		this.chatMessage = chatMessage;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public MenuItem getAbort() {
 		return abort;
 	}
 
+	/**
+	 * 
+	 * @param abort
+	 */
 	public void setAbort(MenuItem abort) {
 		this.abort = abort;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public MenuItem getName() {
 		return name;
 	}
 
+	/**
+	 * 
+	 * @param name
+	 */
 	public void setName(MenuItem name) {
 		this.name = name;
 	}
 
+	/**
+	 * 
+	 * @return
+	 */
 	public Button getSend() {
 		return send;
 	}
 
+	/**
+	 * 
+	 * @param send
+	 */
 	public void setSend(Button send) {
 		this.send = send;
 	}
 
-	class LongRunningOperation extends Thread {
+	/**
+	 * This private class is for the changing the data of the chatText. This
+	 * class will run a thred. You have to do this this way because there are a
+	 * problem if you want to change something in a Thread from another.
+	 * 
+	 * @author AHMED ALY, Alexander Rieppel
+	 * @version 03-14-2013
+	 * 
+	 */
+	private class LongRunningOperation extends Thread {
 		private Display display;
-		private Text progressBar;
-		private List list;
-		private String s;
-		private String[] neu;
-		//private int anzahl;
+		private Text txtField;
 
 		/**
-		 * Alles übergeben was aus diesem Thread erreichbar sein soll
+		 * In this constructor you give what you want in the thread to change
 		 */
-		public LongRunningOperation(Display display, Text progressBar, List list) {
+		public LongRunningOperation(Display display, Text txtField) {
 			this.display = display;
-			this.progressBar = progressBar;
-			this.list = list;
-			s = "";
-			//anzahl = 0;
+			this.txtField = txtField;
 		}
 
 		/**
-		 * Länger laufende Methode um eine Verarbeitung zu simulieren
+		 * This is a Long Running function to simulate the changing
 		 */
 		public void run() {
 			while (!Thread.interrupted()) {
@@ -193,55 +266,18 @@ public class View {
 				} catch (InterruptedException e) {
 					System.out.println(e.getMessage());
 				}
-				// progressBar.setText(reader.getMessage());
-				// ProgressBar kann nur via asyncExec aktualisiert werden!
-				s = " ";
-				if (!progressBar.isDisposed()) {
+				if (!txtField.isDisposed()) {
 					display.asyncExec(new Runnable() {
 						public void run() {
-
-							if (progressBar.isDisposed())
+							if (txtField.isDisposed())
 								return;
-							if (!s.equals(progressBar.getText())) {
-								if (!reader.getMessage().equals("")) {
-									progressBar.append(reader.getMessage());
-									reader.setMessage("");
-									s = progressBar.getText();
-								}
+							if (!reader.getMessage().equals("")) {
+								txtField.append(reader.getMessage());
+								reader.setMessage("");
 							}
 						}
 					});
 				}
-				// display.asyncExec(new Runnable() {
-				// private List list2 = null;
-				//
-				// public void run() {
-				//
-				// if (list.isDisposed())
-				// return;
-				// if (anzahl != list.getItemCount()) {
-				// try {
-				// list2 = list;
-				// list.removeAll();
-				// for (int i = 1; i <= list2.getItemCount(); i++) {
-				// controller.send(list2.getItem(i)
-				// + "I connected");
-				// neu = reader.getLastMessage().split(": ");
-				// if (neu.length == 2)
-				// if (neu[1].equals("I connected")) {
-				// list.add(neu[0]);
-				// neu = null;
-				// reader.setLastMessage("");
-				// }
-				// }
-				// } catch (IOException e) {
-				// // TODO Auto-generated catch block
-				// e.printStackTrace();
-				// }
-				//
-				// }
-				// }
-				// });
 			}
 		}
 	}
