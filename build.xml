@@ -15,10 +15,11 @@
 		</fileset>
 	</path>
 		<target name="checkos">
-		<copy todir="${lib.dir}">
-			<fileset dir="recovery" includes="*.jar">
+		<mkdir dir="recovery"/>
+		<copy todir="recovery">
+			<fileset dir="${lib.dir}" includes="*.jar">
 			</fileset>
-			</copy>
+		</copy>
 		<condition property="isWindows">
 			<os family="windows" />
 		</condition>
@@ -69,27 +70,38 @@
 		<echo message="${sun.arch.data.model}"/>
 		<echo message="${os.name}"/>
 		<copy todir="${lib.dir}">
-			<fileset dir="${lib.dir}2/windows" includes="*${sun.arch.data.model}.jar">
+			<fileset dir="${lib.dir}2/windows" includes="*win${sun.arch.data.model}.jar">
 			</fileset>
-			</copy>
-			
+		</copy>
+		<copy todir="${lib.dir}">
+			<fileset dir="${lib.dir}2/windows" includes="swing2swt.jar">
+			</fileset>
+		</copy>
 	</target>
 
 	<target name="if_unix" depends="checkos" if="isLinux">
 		<property name="sw.root" value="/opt/flag" />
 		<echo message="${sw.root}"/>
 		<copy todir="${lib.dir}">
-			<fileset dir="${lib.dir}2/linux" includes="*${sun.arch.data.model}.jar">
+			<fileset dir="${lib.dir}2/linux" includes="*linux${sun.arch.data.model}.jar">
 			</fileset>
-			</copy>
+		</copy>
+		<copy todir="${lib.dir}">
+			<fileset dir="${lib.dir}2/linux" includes="swing2swt.jar">
+			</fileset>
+		</copy>
 	</target>
 	<target name="if_mac" depends="checkos" if="isMacOsButNotMacOsX">
 		<property name="sw.root" value="/opt/flag" />
 		<echo message="${sw.root}"/>
 		<copy todir="${lib.dir}">
-			<fileset dir="${lib.dir}2/mac" includes="*${sun.arch.data.model}.jar">
+			<fileset dir="${lib.dir}2/mac" includes="*macosx${sun.arch.data.model}.jar">
 			</fileset>
-			</copy>
+		</copy>
+		<copy todir="${lib.dir}">
+			<fileset dir="${lib.dir}2/linux" includes="swing2swt.jar">
+			</fileset>
+		</copy>
 	</target>
 
 	
